@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Valentine</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #3b0a12, #6e0f1c);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      background: #fffafa;
+      padding: 50px 40px;
+      border-radius: 22px;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+      width: 420px;
+      max-width: 90%;
+      position: relative;
+    }
+
+    h1 {
+      color: #4a0d16;
+      margin-bottom: 10px;
+    }
+
+    .heart {
+      font-size: 42px;
+      color: #ffffff;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      position: relative;
+      height: 90px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px 32px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      position: absolute;
+      transition: left 0.25s ease, top 0.25s ease;
+    }
+
+    .yes {
+      background-color: #7b1121;
+      color: white;
+      left: 60px;
+    }
+
+    .no {
+      background-color: #e6dede;
+      color: #4a0d16;
+      left: 220px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background Music -->
+  <audio id="bgMusic" src="everlong.mp3" autoplay loop muted></audio>
+
+  <div class="card">
+    <h1>Akanksha, will you be my Valentine?</h1>
+    <div class="heart">🤍</div>
+
+    <div class="buttons" id="buttonArea">
+      <button class="yes" onclick="yesClicked()">Yes ❤️</button>
+      <button class="no" id="noBtn">No 💔</button>
+    </div>
+  </div>
+
+  <script>
+    const music = document.getElementById("bgMusic");
+    const originalPage = document.body.innerHTML;
+
+    // Unmute music on first interaction
+    document.addEventListener("click", () => {
+      music.muted = false;
+    }, { once: true });
+
+    const noBtn = document.getElementById("noBtn");
+    const area = document.getElementById("buttonArea");
+
+    const startTime = Date.now();
+    const RUN_DURATION = 10000;
+
+    noBtn.addEventListener("mouseenter", () => {
+      if (Date.now() - startTime < RUN_DURATION) {
+        noBtn.style.left = Math.random() * (area.clientWidth - noBtn.offsetWidth) + "px";
+        noBtn.style.top = Math.random() * (area.clientHeight - noBtn.offsetHeight) + "px";
+      }
+    });
+
+    setTimeout(() => {
+      noBtn.addEventListener("click", noClicked);
+    }, RUN_DURATION);
+
+    window.onpopstate = () => {
+      document.body.innerHTML = originalPage;
+      location.reload();
+    };
+
+    function floatImages(src) {
+      document.body.style.overflow = "hidden";
+
+      const interval = setInterval(() => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.style.position = "absolute";
+        img.style.width = "90px";
+        img.style.borderRadius = "16px";
+        img.style.left = Math.random() * window.innerWidth + "px";
+        img.style.top = window.innerHeight + "px";
+        img.style.transition = "transform 3s linear, opacity 3s linear";
+
+        document.body.appendChild(img);
+
+        requestAnimationFrame(() => {
+          img.style.transform = "translateY(-130vh)";
+          img.style.opacity = "0";
+        });
+
+        setTimeout(() => img.remove(), 3000);
+      }, 150);
+
+      setTimeout(() => clearInterval(interval), 5000);
+    }
+
+    function yesClicked() {
+      history.pushState({}, "", "");
+
+      document.body.innerHTML = `
+        <div style="
+          background:#3b0a12;
+          color:white;
+          height:100vh;
+          width:100vw;
+          display:flex;
+          flex-direction:column;
+          justify-content:center;
+          align-items:center;
+          text-align:center;
+          overflow:hidden;">
+          <h1>❤️❤️❤️</h1>
+          <h2>I loooooove you</h2>
+          <p>I'm the luckiest boy in the world :)</p>
+        </div>
+      `;
+
+      document.body.appendChild(music);
+      floatImages("d1.png");
+    }
+
+    function noClicked() {
+      history.pushState({}, "", "");
+
+      document.body.innerHTML = `
+        <div style="
+          background:#fffafa;
+          color:#4a0d16;
+          height:100vh;
+          width:100vw;
+          display:flex;
+          flex-direction:column;
+          justify-content:center;
+          align-items:center;
+          text-align:center;
+          overflow:hidden;">
+          <h1>💔</h1>
+          <h2>You caught it :(</h2>
+          <p>Can I still interest you with a burger?</p>
+        </div>
+      `;
+
+      document.body.appendChild(music);
+      floatImages("d2.png");
+    }
+  </script>
+</body>
+</html>

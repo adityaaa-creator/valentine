@@ -5,14 +5,19 @@
   <title>Valentine</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #3b0a12, #6e0f1c);
+      background: linear-gradient(135deg, #2a070d, #6e0f1c);
       font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
     }
 
     .card {
@@ -24,6 +29,7 @@
       width: 420px;
       max-width: 90%;
       position: relative;
+      z-index: 10;
     }
 
     h1 {
@@ -63,15 +69,60 @@
       color: #4a0d16;
       left: 220px;
     }
+
+    /* Floating images */
+    .float-img {
+      position: absolute;
+      width: 120px;
+      border-radius: 18px;
+      pointer-events: none;
+      animation: floatUp 2.2s linear forwards;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-300px) rotate(20deg);
+        opacity: 0;
+      }
+    }
+
+    /* Reaction screens */
+    .reaction {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #2a070d, #6e0f1c);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      z-index: 20;
+    }
+
+    .reaction h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .reaction p {
+      font-size: 22px;
+      max-width: 600px;
+    }
   </style>
 </head>
 
 <body>
 
   <!-- Background Music -->
-  <audio id="bgMusic" src="everlong.mp3" autoplay loop muted></audio>
+  <audio id="bgMusic" src="everlong.mp3" loop></audio>
 
-  <div class="card">
+  <!-- Main Card -->
+  <div class="card" id="mainCard">
     <h1>Akanksha, will you be my Valentine?</h1>
     <div class="heart">🤍</div>
 
@@ -82,14 +133,23 @@
   </div>
 
   <script>
+    /* ===== MUSIC ON FIRST INTERACTION ===== */
+    let musicStarted = false;
     const music = document.getElementById("bgMusic");
-    const originalPage = document.body.innerHTML;
 
-    // Unmute music on first interaction
-    document.addEventListener("click", () => {
-      music.muted = false;
-    }, { once: true });
+    function startMusicOnce() {
+      if (!musicStarted) {
+        music.play().catch(() => {});
+        musicStarted = true;
+        document.removeEventListener("mousemove", startMusicOnce);
+        document.removeEventListener("click", startMusicOnce);
+      }
+    }
 
+    document.addEventListener("mousemove", startMusicOnce);
+    document.addEventListener("click", startMusicOnce);
+
+    /* ===== NO BUTTON RUN AWAY ===== */
     const noBtn = document.getElementById("noBtn");
     const area = document.getElementById("buttonArea");
 
@@ -97,96 +157,63 @@
     const RUN_DURATION = 10000;
 
     noBtn.addEventListener("mouseenter", () => {
-      if (Date.now() - startTime < RUN_DURATION) {
-        noBtn.style.left = Math.random() * (area.clientWidth - noBtn.offsetWidth) + "px";
-        noBtn.style.top = Math.random() * (area.clientHeight - noBtn.offsetHeight) + "px";
+      const elapsed = Date.now() - startTime;
+      if (elapsed < RUN_DURATION) {
+        const maxX = area.clientWidth - noBtn.offsetWidth;
+        const maxY = area.clientHeight - noBtn.offsetHeight;
+        noBtn.style.left = Math.random() * maxX + "px";
+        noBtn.style.top = Math.random() * maxY + "px";
       }
     });
 
     setTimeout(() => {
-      noBtn.addEventListener("click", noClicked);
+      noBtn.onclick = noClicked;
     }, RUN_DURATION);
 
-    window.onpopstate = () => {
-      document.body.innerHTML = originalPage;
-      location.reload();
-    };
-
-    function floatImages(src) {
-      document.body.style.overflow = "hidden";
-
+    /* ===== FLOATING IMAGES ===== */
+    function launchImages(imgSrc) {
       const interval = setInterval(() => {
-        const img = document.createElement("img");
-        img.src = src;
-        img.style.position = "absolute";
-        img.style.width = "90px";
-        img.style.borderRadius = "16px";
-        img.style.left = Math.random() * window.innerWidth + "px";
-        img.style.top = window.innerHeight + "px";
-        img.style.transition = "transform 3s linear, opacity 3s linear";
-
-        document.body.appendChild(img);
-
-        requestAnimationFrame(() => {
-          img.style.transform = "translateY(-130vh)";
-          img.style.opacity = "0";
-        });
-
-        setTimeout(() => img.remove(), 3000);
-      }, 150);
+        for (let i = 0; i < 4; i++) {
+          const img = document.createElement("img");
+          img.src = imgSrc;
+          img.className = "float-img";
+          img.style.left = Math.random() * window.innerWidth + "px";
+          img.style.top = window.innerHeight + "px";
+          document.body.appendChild(img);
+          setTimeout(() => img.remove(), 2300);
+        }
+      }, 180);
 
       setTimeout(() => clearInterval(interval), 5000);
     }
 
+    /* ===== YES / NO ACTIONS ===== */
     function yesClicked() {
-      history.pushState({}, "", "");
+      document.getElementById("mainCard").remove();
+      launchImages("d1.png");
 
-      document.body.innerHTML = `
-        <div style="
-          background:#3b0a12;
-          color:white;
-          height:100vh;
-          width:100vw;
-          display:flex;
-          flex-direction:column;
-          justify-content:center;
-          align-items:center;
-          text-align:center;
-          overflow:hidden;">
-          <h1>❤️❤️❤️</h1>
-          <h2>I loooooove you</h2>
-          <p>I'm the luckiest boy in the world :)</p>
-        </div>
+      const screen = document.createElement("div");
+      screen.className = "reaction";
+      screen.innerHTML = `
+        <h1>❤️❤️❤️</h1>
+        <p>I loooooove you.<br>I'm the luckiest boy in the world :)</p>
       `;
-
-      document.body.appendChild(music);
-      floatImages("d1.png");
+      document.body.appendChild(screen);
     }
 
     function noClicked() {
-      history.pushState({}, "", "");
+      document.getElementById("mainCard").remove();
+      launchImages("d2.png");
 
-      document.body.innerHTML = `
-        <div style="
-          background:#fffafa;
-          color:#4a0d16;
-          height:100vh;
-          width:100vw;
-          display:flex;
-          flex-direction:column;
-          justify-content:center;
-          align-items:center;
-          text-align:center;
-          overflow:hidden;">
-          <h1>💔</h1>
-          <h2>You caught it :(</h2>
-          <p>Can I still interest you with a burger?</p>
-        </div>
+      const screen = document.createElement("div");
+      screen.className = "reaction";
+      screen.innerHTML = `
+        <h1>💔</h1>
+        <p>You caught it :(<br>Can I still interest you with a burger?</p>
       `;
-
-      document.body.appendChild(music);
-      floatImages("d2.png");
+      document.body.appendChild(screen);
     }
   </script>
+
 </body>
 </html>

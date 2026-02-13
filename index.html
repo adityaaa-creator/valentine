@@ -39,7 +39,6 @@
 
     .heart {
       font-size: 42px;
-      color: #ffffff;
       margin-bottom: 30px;
     }
 
@@ -73,24 +72,25 @@
     /* Floating images */
     .float-img {
       position: absolute;
-      width: 120px;
+      width: 130px;
       border-radius: 18px;
       pointer-events: none;
       animation: floatUp 2.2s linear forwards;
+      z-index: 999;
     }
 
     @keyframes floatUp {
       from {
-        transform: translateY(0) rotate(0deg);
+        transform: translateY(0);
         opacity: 1;
       }
       to {
-        transform: translateY(-300px) rotate(20deg);
+        transform: translateY(-600px);
         opacity: 0;
       }
     }
 
-    /* Reaction screens */
+    /* Reaction screen */
     .reaction {
       position: fixed;
       inset: 0;
@@ -133,23 +133,21 @@
   </div>
 
   <script>
-    /* ===== MUSIC ON FIRST INTERACTION ===== */
-    let musicStarted = false;
+    /* ================= MUSIC: start on first cursor move ================= */
     const music = document.getElementById("bgMusic");
+    let musicStarted = false;
 
-    function startMusicOnce() {
+    function startMusic() {
       if (!musicStarted) {
         music.play().catch(() => {});
         musicStarted = true;
-        document.removeEventListener("mousemove", startMusicOnce);
-        document.removeEventListener("click", startMusicOnce);
       }
     }
 
-    document.addEventListener("mousemove", startMusicOnce);
-    document.addEventListener("click", startMusicOnce);
+    document.addEventListener("mousemove", startMusic, { once: true });
+    document.addEventListener("click", startMusic, { once: true });
 
-    /* ===== NO BUTTON RUN AWAY ===== */
+    /* ================= NO BUTTON RUN AWAY ================= */
     const noBtn = document.getElementById("noBtn");
     const area = document.getElementById("buttonArea");
 
@@ -170,48 +168,49 @@
       noBtn.onclick = noClicked;
     }, RUN_DURATION);
 
-    /* ===== FLOATING IMAGES ===== */
+    /* ================= FLOATING IMAGES ================= */
     function launchImages(imgSrc) {
       const interval = setInterval(() => {
-        for (let i = 0; i < 4; i++) {
-          const img = document.createElement("img");
-          img.src = imgSrc;
-          img.className = "float-img";
-          img.style.left = Math.random() * window.innerWidth + "px";
-          img.style.top = window.innerHeight + "px";
-          document.body.appendChild(img);
-          setTimeout(() => img.remove(), 2300);
-        }
-      }, 180);
+        const img = document.createElement("img");
+        img.src = imgSrc;
+        img.className = "float-img";
+        img.style.left = Math.random() * window.innerWidth + "px";
+        img.style.top = window.innerHeight + "px";
+        document.body.appendChild(img);
+
+        setTimeout(() => img.remove(), 2200);
+      }, 350);
 
       setTimeout(() => clearInterval(interval), 5000);
     }
 
-    /* ===== YES / NO ACTIONS ===== */
+    /* ================= YES / NO ACTIONS ================= */
     function yesClicked() {
       document.getElementById("mainCard").remove();
-      launchImages("d1.png");
 
       const screen = document.createElement("div");
       screen.className = "reaction";
       screen.innerHTML = `
         <h1>❤️❤️❤️</h1>
-        <p>I loooooove you.<br>I'm the luckiest boy in the world :)</p>
+        <p>I loooooove you<br>I'm the luckiest boy in the world :)</p>
       `;
       document.body.appendChild(screen);
+
+      launchImages("d1.png");
     }
 
     function noClicked() {
       document.getElementById("mainCard").remove();
-      launchImages("d2.png");
 
       const screen = document.createElement("div");
       screen.className = "reaction";
       screen.innerHTML = `
         <h1>💔</h1>
-        <p>You caught it :(<br>Can I still interest you with a burger?</p>
+        <p>You caught it :(<br>Can I still interest you in a burger?</p>
       `;
       document.body.appendChild(screen);
+
+      launchImages("d2.png");
     }
   </script>
 

@@ -69,7 +69,6 @@
       left: 220px;
     }
 
-    /* Floating images */
     .float-img {
       position: absolute;
       width: 130px;
@@ -90,7 +89,6 @@
       }
     }
 
-    /* Reaction screen */
     .reaction {
       position: fixed;
       inset: 0;
@@ -121,7 +119,6 @@
   <!-- Background Music -->
   <audio id="bgMusic" src="everlong.mp3" loop></audio>
 
-  <!-- Main Card -->
   <div class="card" id="mainCard">
     <h1>Akanksha, will you be my Valentine?</h1>
     <div class="heart">🤍</div>
@@ -133,21 +130,26 @@
   </div>
 
   <script>
-    /* ================= MUSIC: start on first cursor move ================= */
+    /* ===== MUSIC: browser-safe start ===== */
     const music = document.getElementById("bgMusic");
     let musicStarted = false;
 
     function startMusic() {
       if (!musicStarted) {
+        music.volume = 1;
         music.play().catch(() => {});
         musicStarted = true;
       }
     }
 
-    document.addEventListener("mousemove", startMusic, { once: true });
-    document.addEventListener("click", startMusic, { once: true });
+    // mouse movement
+    document.addEventListener("mousemove", startMusic);
 
-    /* ================= NO BUTTON RUN AWAY ================= */
+    // fallback for strict browsers (still invisible)
+    document.addEventListener("pointerdown", startMusic);
+    document.addEventListener("click", startMusic);
+
+    /* ===== NO BUTTON RUN AWAY ===== */
     const noBtn = document.getElementById("noBtn");
     const area = document.getElementById("buttonArea");
 
@@ -168,7 +170,7 @@
       noBtn.onclick = noClicked;
     }, RUN_DURATION);
 
-    /* ================= FLOATING IMAGES ================= */
+    /* ===== FLOATING IMAGES ===== */
     function launchImages(imgSrc) {
       const interval = setInterval(() => {
         const img = document.createElement("img");
@@ -184,7 +186,7 @@
       setTimeout(() => clearInterval(interval), 5000);
     }
 
-    /* ================= YES / NO ACTIONS ================= */
+    /* ===== YES / NO ===== */
     function yesClicked() {
       document.getElementById("mainCard").remove();
 

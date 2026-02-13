@@ -20,6 +20,24 @@
       overflow: hidden;
     }
 
+    /* ===== FIRST SCREEN ===== */
+    .start-screen {
+      background: #fffafa;
+      padding: 40px 50px;
+      border-radius: 22px;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+      cursor: pointer;
+      z-index: 30;
+    }
+
+    .start-screen h1 {
+      color: #4a0d16;
+      font-size: 26px;
+      margin: 0;
+    }
+
+    /* ===== MAIN CARD ===== */
     .card {
       background: #fffafa;
       padding: 50px 40px;
@@ -30,6 +48,7 @@
       max-width: 90%;
       position: relative;
       z-index: 10;
+      display: none;
     }
 
     h1 {
@@ -69,6 +88,7 @@
       left: 220px;
     }
 
+    /* ===== FLOATING IMAGES ===== */
     .float-img {
       position: absolute;
       width: 130px;
@@ -79,10 +99,17 @@
     }
 
     @keyframes floatUp {
-      from { transform: translateY(0); opacity: 1; }
-      to   { transform: translateY(-600px); opacity: 0; }
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-600px);
+        opacity: 0;
+      }
     }
 
+    /* ===== REACTION SCREEN ===== */
     .reaction {
       position: fixed;
       inset: 0;
@@ -105,26 +132,22 @@
       font-size: 22px;
       max-width: 600px;
     }
-
-    /* Invisible click layer */
-    #audioUnlock {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: transparent;
-    }
   </style>
 </head>
 
 <body>
 
+  <!-- MUSIC -->
   <audio id="bgMusic" src="everlong.mp3" loop></audio>
 
-  <!-- Invisible audio unlock layer -->
-  <div id="audioUnlock"></div>
+  <!-- FIRST CLICK SCREEN -->
+  <div class="start-screen" id="startScreen">
+    <h1>Click here for a surprise! 🤍</h1>
+  </div>
 
+  <!-- MAIN CARD -->
   <div class="card" id="mainCard">
-    <h1>Akanksha, will you be my Valentine?</h1>
+    <h1>Akanksha, will you be my forever valentine?</h1>
     <div class="heart">🤍</div>
 
     <div class="buttons" id="buttonArea">
@@ -134,13 +157,15 @@
   </div>
 
   <script>
-    /* ===== AUDIO UNLOCK (GUARANTEED) ===== */
+    /* ===== START EXPERIENCE (MUSIC + PAGE) ===== */
     const music = document.getElementById("bgMusic");
-    const unlock = document.getElementById("audioUnlock");
+    const startScreen = document.getElementById("startScreen");
+    const mainCard = document.getElementById("mainCard");
 
-    unlock.addEventListener("click", () => {
-      music.play();
-      unlock.remove(); // remove layer after first click
+    startScreen.addEventListener("click", () => {
+      music.play().catch(() => {});
+      startScreen.remove();
+      mainCard.style.display = "block";
     });
 
     /* ===== NO BUTTON RUN AWAY ===== */
@@ -151,41 +176,61 @@
     const RUN_DURATION = 10000;
 
     noBtn.addEventListener("mouseenter", () => {
-      if (Date.now() - startTime < RUN_DURATION) {
-        noBtn.style.left = Math.random() * (area.clientWidth - noBtn.offsetWidth) + "px";
-        noBtn.style.top  = Math.random() * (area.clientHeight - noBtn.offsetHeight) + "px";
+      const elapsed = Date.now() - startTime;
+      if (elapsed < RUN_DURATION) {
+        const maxX = area.clientWidth - noBtn.offsetWidth;
+        const maxY = area.clientHeight - noBtn.offsetHeight;
+        noBtn.style.left = Math.random() * maxX + "px";
+        noBtn.style.top = Math.random() * maxY + "px";
       }
     });
 
-    setTimeout(() => noBtn.onclick = noClicked, RUN_DURATION);
+    setTimeout(() => {
+      noBtn.onclick = noClicked;
+    }, RUN_DURATION);
 
     /* ===== FLOATING IMAGES ===== */
-    function launchImages(src) {
-      const i = setInterval(() => {
+    function launchImages(imgSrc) {
+      const interval = setInterval(() => {
         const img = document.createElement("img");
-        img.src = src;
+        img.src = imgSrc;
         img.className = "float-img";
         img.style.left = Math.random() * window.innerWidth + "px";
         img.style.top = window.innerHeight + "px";
         document.body.appendChild(img);
+
         setTimeout(() => img.remove(), 2200);
       }, 350);
-      setTimeout(() => clearInterval(i), 5000);
+
+      setTimeout(() => clearInterval(interval), 5000);
     }
 
+    /* ===== YES / NO ACTIONS ===== */
     function yesClicked() {
       mainCard.remove();
-      document.body.insertAdjacentHTML("beforeend",
-        `<div class="reaction"><h1>❤️❤️❤️</h1><p>I loooooove you<br>I'm the luckiest boy in the world :)</p></div>`
-      );
+
+      const screen = document.createElement("div");
+      screen.className = "reaction";
+      screen.innerHTML = `
+        <h1>❤️❤️❤️</h1>
+        <p>I loooooove you<br>I'm the luckiest boy in the world :)</p>
+      `;
+      document.body.appendChild(screen);
+
       launchImages("d1.png");
     }
 
     function noClicked() {
       mainCard.remove();
-      document.body.insertAdjacentHTML("beforeend",
-        `<div class="reaction"><h1>💔</h1><p>You caught it :(<br>Can I still interest you in a burger?</p></div>`
-      );
+
+      const screen = document.createElement("div");
+      screen.className = "reaction";
+      screen.innerHTML = `
+        <h1>💔</h1>
+        <p>You caught it :(<br>Can I still interest you in a burger?</p>
+      `;
+      document.body.appendChild(screen);
+
       launchImages("d2.png");
     }
   </script>

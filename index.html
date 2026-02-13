@@ -79,14 +79,8 @@
     }
 
     @keyframes floatUp {
-      from {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateY(-600px);
-        opacity: 0;
-      }
+      from { transform: translateY(0); opacity: 1; }
+      to   { transform: translateY(-600px); opacity: 0; }
     }
 
     .reaction {
@@ -111,13 +105,23 @@
       font-size: 22px;
       max-width: 600px;
     }
+
+    /* Invisible click layer */
+    #audioUnlock {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: transparent;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- Background Music -->
   <audio id="bgMusic" src="everlong.mp3" loop></audio>
+
+  <!-- Invisible audio unlock layer -->
+  <div id="audioUnlock"></div>
 
   <div class="card" id="mainCard">
     <h1>Akanksha, will you be my Valentine?</h1>
@@ -130,24 +134,14 @@
   </div>
 
   <script>
-    /* ===== MUSIC: browser-safe start ===== */
+    /* ===== AUDIO UNLOCK (GUARANTEED) ===== */
     const music = document.getElementById("bgMusic");
-    let musicStarted = false;
+    const unlock = document.getElementById("audioUnlock");
 
-    function startMusic() {
-      if (!musicStarted) {
-        music.volume = 1;
-        music.play().catch(() => {});
-        musicStarted = true;
-      }
-    }
-
-    // mouse movement
-    document.addEventListener("mousemove", startMusic);
-
-    // fallback for strict browsers (still invisible)
-    document.addEventListener("pointerdown", startMusic);
-    document.addEventListener("click", startMusic);
+    unlock.addEventListener("click", () => {
+      music.play();
+      unlock.remove(); // remove layer after first click
+    });
 
     /* ===== NO BUTTON RUN AWAY ===== */
     const noBtn = document.getElementById("noBtn");
@@ -157,61 +151,41 @@
     const RUN_DURATION = 10000;
 
     noBtn.addEventListener("mouseenter", () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed < RUN_DURATION) {
-        const maxX = area.clientWidth - noBtn.offsetWidth;
-        const maxY = area.clientHeight - noBtn.offsetHeight;
-        noBtn.style.left = Math.random() * maxX + "px";
-        noBtn.style.top = Math.random() * maxY + "px";
+      if (Date.now() - startTime < RUN_DURATION) {
+        noBtn.style.left = Math.random() * (area.clientWidth - noBtn.offsetWidth) + "px";
+        noBtn.style.top  = Math.random() * (area.clientHeight - noBtn.offsetHeight) + "px";
       }
     });
 
-    setTimeout(() => {
-      noBtn.onclick = noClicked;
-    }, RUN_DURATION);
+    setTimeout(() => noBtn.onclick = noClicked, RUN_DURATION);
 
     /* ===== FLOATING IMAGES ===== */
-    function launchImages(imgSrc) {
-      const interval = setInterval(() => {
+    function launchImages(src) {
+      const i = setInterval(() => {
         const img = document.createElement("img");
-        img.src = imgSrc;
+        img.src = src;
         img.className = "float-img";
         img.style.left = Math.random() * window.innerWidth + "px";
         img.style.top = window.innerHeight + "px";
         document.body.appendChild(img);
-
         setTimeout(() => img.remove(), 2200);
       }, 350);
-
-      setTimeout(() => clearInterval(interval), 5000);
+      setTimeout(() => clearInterval(i), 5000);
     }
 
-    /* ===== YES / NO ===== */
     function yesClicked() {
-      document.getElementById("mainCard").remove();
-
-      const screen = document.createElement("div");
-      screen.className = "reaction";
-      screen.innerHTML = `
-        <h1>❤️❤️❤️</h1>
-        <p>I loooooove you<br>I'm the luckiest boy in the world :)</p>
-      `;
-      document.body.appendChild(screen);
-
+      mainCard.remove();
+      document.body.insertAdjacentHTML("beforeend",
+        `<div class="reaction"><h1>❤️❤️❤️</h1><p>I loooooove you<br>I'm the luckiest boy in the world :)</p></div>`
+      );
       launchImages("d1.png");
     }
 
     function noClicked() {
-      document.getElementById("mainCard").remove();
-
-      const screen = document.createElement("div");
-      screen.className = "reaction";
-      screen.innerHTML = `
-        <h1>💔</h1>
-        <p>You caught it :(<br>Can I still interest you in a burger?</p>
-      `;
-      document.body.appendChild(screen);
-
+      mainCard.remove();
+      document.body.insertAdjacentHTML("beforeend",
+        `<div class="reaction"><h1>💔</h1><p>You caught it :(<br>Can I still interest you in a burger?</p></div>`
+      );
       launchImages("d2.png");
     }
   </script>

@@ -64,6 +64,7 @@
     .buttons {
       position: relative;
       height: 90px;
+      width: 100%;
     }
 
     button {
@@ -73,19 +74,22 @@
       border-radius: 30px;
       cursor: pointer;
       position: absolute;
+      top: 0;
       transition: left 0.25s ease, top 0.25s ease;
     }
 
     .yes {
       background-color: #7b1121;
       color: white;
-      left: 60px;
+      left: 50%;
+      transform: translateX(-110%);
     }
 
     .no {
       background-color: #e6dede;
       color: #4a0d16;
-      left: 220px;
+      left: 50%;
+      transform: translateX(10%);
     }
 
     /* ===== FLOATING IMAGES ===== */
@@ -99,14 +103,8 @@
     }
 
     @keyframes floatUp {
-      from {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateY(-600px);
-        opacity: 0;
-      }
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-600px); opacity: 0; }
     }
 
     /* ===== REACTION SCREEN ===== */
@@ -132,6 +130,17 @@
       font-size: 22px;
       max-width: 600px;
     }
+
+    .back-btn {
+      margin-top: 30px;
+      background: white;
+      color: #4a0d16;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+    }
   </style>
 </head>
 
@@ -140,14 +149,14 @@
   <!-- MUSIC -->
   <audio id="bgMusic" src="everlong.mp3" loop></audio>
 
-  <!-- FIRST CLICK SCREEN -->
+  <!-- START SCREEN -->
   <div class="start-screen" id="startScreen">
     <h1>Click here for a surprise! 🤍</h1>
   </div>
 
-  <!-- MAIN CARD -->
+  <!-- QUESTION CARD -->
   <div class="card" id="mainCard">
-    <h1>Akanksha, will you be my forever valentine?</h1>
+    <h1>Akanksha, will you be my Valentine?</h1>
     <div class="heart">🤍</div>
 
     <div class="buttons" id="buttonArea">
@@ -157,81 +166,72 @@
   </div>
 
   <script>
-    /* ===== START EXPERIENCE (MUSIC + PAGE) ===== */
     const music = document.getElementById("bgMusic");
     const startScreen = document.getElementById("startScreen");
     const mainCard = document.getElementById("mainCard");
 
-    startScreen.addEventListener("click", () => {
+    startScreen.onclick = () => {
       music.play().catch(() => {});
       startScreen.remove();
       mainCard.style.display = "block";
-    });
+    };
 
     /* ===== NO BUTTON RUN AWAY ===== */
     const noBtn = document.getElementById("noBtn");
     const area = document.getElementById("buttonArea");
-
     const startTime = Date.now();
     const RUN_DURATION = 10000;
 
     noBtn.addEventListener("mouseenter", () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed < RUN_DURATION) {
-        const maxX = area.clientWidth - noBtn.offsetWidth;
-        const maxY = area.clientHeight - noBtn.offsetHeight;
-        noBtn.style.left = Math.random() * maxX + "px";
-        noBtn.style.top = Math.random() * maxY + "px";
+      if (Date.now() - startTime < RUN_DURATION) {
+        noBtn.style.left = Math.random() * (area.clientWidth - noBtn.offsetWidth) + "px";
+        noBtn.style.top = Math.random() * (area.clientHeight - noBtn.offsetHeight) + "px";
       }
     });
 
-    setTimeout(() => {
-      noBtn.onclick = noClicked;
-    }, RUN_DURATION);
+    setTimeout(() => noBtn.onclick = noClicked, RUN_DURATION);
 
     /* ===== FLOATING IMAGES ===== */
-    function launchImages(imgSrc) {
+    function launchImages(src) {
       const interval = setInterval(() => {
         const img = document.createElement("img");
-        img.src = imgSrc;
+        img.src = src;
         img.className = "float-img";
         img.style.left = Math.random() * window.innerWidth + "px";
         img.style.top = window.innerHeight + "px";
         document.body.appendChild(img);
-
         setTimeout(() => img.remove(), 2200);
       }, 350);
-
       setTimeout(() => clearInterval(interval), 5000);
     }
 
-    /* ===== YES / NO ACTIONS ===== */
+    /* ===== YES / NO ===== */
     function yesClicked() {
-      mainCard.remove();
-
-      const screen = document.createElement("div");
-      screen.className = "reaction";
-      screen.innerHTML = `
-        <h1>❤️❤️❤️</h1>
-        <p>I loooooove you<br>I'm the luckiest boy in the world :)</p>
-      `;
-      document.body.appendChild(screen);
-
-      launchImages("d1.png");
+      mainCard.style.display = "none";
+      showReaction("❤️❤️❤️", "I loooooove you<br>I'm the luckiest boy in the world :)", "d1.png");
     }
 
     function noClicked() {
-      mainCard.remove();
+      mainCard.style.display = "none";
+      showReaction("💔", "You caught it :(<br>Can I still interest you in a burger?", "d2.png");
+    }
 
+    function showReaction(emoji, text, img) {
       const screen = document.createElement("div");
       screen.className = "reaction";
       screen.innerHTML = `
-        <h1>💔</h1>
-        <p>You caught it :(<br>Can I still interest you in a burger?</p>
+        <h1>${emoji}</h1>
+        <p>${text}</p>
+        <button class="back-btn">Go back</button>
       `;
       document.body.appendChild(screen);
 
-      launchImages("d2.png");
+      launchImages(img);
+
+      screen.querySelector(".back-btn").onclick = () => {
+        screen.remove();
+        mainCard.style.display = "block";
+      };
     }
   </script>
 
